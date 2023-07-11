@@ -4,8 +4,10 @@ import pandas as pd
 import numpy as np
 from flask import Flask, request, jsonify
 import os
+from flask_cors import CORS,cross_origin
 
 app = Flask(__name__)
+CORS(app)
 
 def get_response(text):
     embedding_model = "text-embedding-ada-002"
@@ -54,9 +56,11 @@ def get_response(text):
     return response_message["choices"][0]["message"]
 
 @app.route('/query', methods=['POST'])
+@cross_origin()
 def query():
     data = request.get_json()
     text = data['text']
+    print(data)
     response = get_response(text)
     return jsonify({'response': response})
 
