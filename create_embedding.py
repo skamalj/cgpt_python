@@ -2,7 +2,7 @@ import boto3
 import json
 import time
 import openai
-from openai.embeddings_utils import get_embedding, cosine_similarity
+from openai.embeddings_utils import get_embedding
 import pandas as pd
 import os
 
