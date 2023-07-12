@@ -9,7 +9,7 @@ from flask_cors import CORS,cross_origin
 app = Flask(__name__)
 CORS(app)
 
-def get_response(text):
+def get_response(text, temperature):
     embedding_model = "text-embedding-ada-002"
 
     # Read the OpenAI API key from the environment variable
@@ -45,10 +45,10 @@ def get_response(text):
  
     response_message = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        temperature=0.7,
+        temperature=temperature,
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "assistant", "content": content},
+            #{"role": "assistant", "content": content},
             {"role": "user", "content": text}
         ]
     )
@@ -60,8 +60,9 @@ def get_response(text):
 def query():
     data = request.get_json()
     text = data['text']
+    temperature = float(data['temperature'])
     print(data)
-    response = get_response(text)
+    response = get_response(text, temperature)
     return jsonify({'response': response})
 
 if __name__ == '__main__':
