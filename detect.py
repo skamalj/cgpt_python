@@ -48,7 +48,7 @@ def get_response(text, temperature):
         temperature=temperature,
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            #{"role": "assistant", "content": content},
+            {"role": "assistant", "content": content},
             {"role": "user", "content": text}
         ]
     )
