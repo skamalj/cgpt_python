@@ -5,6 +5,14 @@ import openai
 from openai.embeddings_utils import get_embedding
 import pandas as pd
 import os
+import sys
+
+# Read the input filename from the command line arguments
+if len(sys.argv) != 2:
+    print("Usage: python script_name.py input_filename.pdf")
+    sys.exit(1)
+
+input_filename = sys.argv[1]
 
 embedding_model = "text-embedding-ada-002"
 # Read the OpenAI API key from the environment variable
@@ -43,12 +51,12 @@ response = textract.start_document_text_detection(
     DocumentLocation={
         'S3Object': {
             'Bucket': 'cgpt-skamalj',
-            'Name': 'input/kesp102.pdf',
+            'Name': f'input/{input_filename}',
         }
     },
     OutputConfig={
         'S3Bucket': 'cgpt-skamalj',
-        'S3Prefix': 'output/kesp102'
+        'S3Prefix': f'output/{input_filename[:-4]}'
     }
 )
 print(json.dumps(response, indent=4))
@@ -61,6 +69,7 @@ resp_df_grouped = resp_df.groupby('Page').agg(lambda x: ' '.join(x))
 
 resp_df_grouped["embedding"] = resp_df_grouped.filter(['Text']).applymap(lambda x: get_embedding(x, engine=embedding_model))
 
-resp_df_grouped.to_csv("kesp102_embedding.csv")
+output_filename = f'{input_filename[:-4]}_embedding.csv'
+resp_df_grouped.to_csv(output_filename)
 print(resp_df_grouped)
 

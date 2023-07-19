@@ -21,8 +21,16 @@ def get_response(text, temperature):
     df_ch1['name'] = 'Horses'
     df_ch2 = pd.read_csv('kesp102_embedding.csv')
     df_ch2['name'] = 'Address'
+    df_ch3 = pd.read_csv('kesp103_embedding.csv')
+    df_ch3['name'] = 'Mother'
+    df_ch4 = pd.read_csv('kesp104_embedding.csv')
+    df_ch4['name'] = 'Ghat'
+    df_ch5 = pd.read_csv('kesp105_embedding.csv')
+    df_ch5['name'] = 'Birth'
+    df_ch6 = pd.read_csv('kesp106_embedding.csv')
+    df_ch6['name'] = 'Melon'
 
-    resp_df_grouped = pd.concat([df_ch1, df_ch2])
+    resp_df_grouped = pd.concat([df_ch1, df_ch2, df_ch3, df_ch4, df_ch5, df_ch6])
 
     resp_df_grouped['embedding'] = resp_df_grouped.embedding.apply(eval).apply(np.array)
 
@@ -37,7 +45,7 @@ def get_response(text, temperature):
     print(f"Found match in chapter {chapter} and page {top_page}")
 
     content = ''
-    for i in range(-1,2):
+    for i in range(-2,3):
       try:
         content += ' ' + resp_df_grouped_result.query("name == @chapter").query("Page == @top_page+@i").iloc[0].Text
       except Exception:
