@@ -5,52 +5,70 @@ import numpy as np
 from flask import Flask, request, jsonify
 import os
 from flask_cors import CORS,cross_origin
+import traceback
+import tiktoken
 
 app = Flask(__name__)
 CORS(app)
+embedding_model = "text-embedding-ada-002"
 
-def get_response(text, temperature):
-    embedding_model = "text-embedding-ada-002"
+def load_embeddings():
+    filenames = [
+        ('kesp101_embedding.csv', 'Horses'),
+        ('kesp102_embedding.csv', 'Address'),
+        ('kesp103_embedding.csv', 'Mother'),
+        ('kesp104_embedding.csv', 'Ghat'),
+        ('kesp105_embedding.csv', 'Birth'),
+        ('kesp106_embedding.csv', 'Melon')
+    ]
+    
+    dfs = []
+    for filename, name in filenames:
+        df = pd.read_csv(filename)
+        df['name'] = name
+        df['embedding'] = df['embedding'].apply(eval).apply(np.array)
+        dfs.append(df)
+    
+    return pd.concat(dfs)
+
+# Load embeddings
+embedding_df = load_embeddings()
+
+def get_related_text_content(text):
+    text_embedding = get_embedding(text, engine=embedding_model)
+
+    embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
+
+    result_df = embedding_df.sort_values(by=['similarity'], ascending=False)
+
+    chapter = result_df.iloc[0]["name"]
+    top_page = result_df.iloc[0]["Page"]
+    print(f"Found match in chapter {chapter} and page {top_page}")
+
+    content = ''
+    for i in range(-1,2):
+      try:
+        content += ' ' + result_df.query("name == @chapter").query("Page == @top_page+@i").iloc[0].Text
+      except Exception:
+         pass
+    return content
+
+def count_tokens(text):
+    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    num_tokens = len(encoding.encode(text))
+    return num_tokens
+
+def get_response(text, temperature, full='N'):
+    
 
     # Read the OpenAI API key from the environment variable
     openai_api_key = os.environ.get('OPENAPI_API_KEY')
     # Set the OpenAI API key
     openai.api_key = openai_api_key
 
-    df_ch1 = pd.read_csv('kesp101_embedding.csv')
-    df_ch1['name'] = 'Horses'
-    df_ch2 = pd.read_csv('kesp102_embedding.csv')
-    df_ch2['name'] = 'Address'
-    df_ch3 = pd.read_csv('kesp103_embedding.csv')
-    df_ch3['name'] = 'Mother'
-    df_ch4 = pd.read_csv('kesp104_embedding.csv')
-    df_ch4['name'] = 'Ghat'
-    df_ch5 = pd.read_csv('kesp105_embedding.csv')
-    df_ch5['name'] = 'Birth'
-    df_ch6 = pd.read_csv('kesp106_embedding.csv')
-    df_ch6['name'] = 'Melon'
+    content =  get_related_text_content(text) if full == 'N' else ' '.join(embedding_df['Text'])
+    print(f'Request has {count_tokens(content + text)} tokens')
 
-    resp_df_grouped = pd.concat([df_ch1, df_ch2, df_ch3, df_ch4, df_ch5, df_ch6])
-
-    resp_df_grouped['embedding'] = resp_df_grouped.embedding.apply(eval).apply(np.array)
-
-    test_embedding = get_embedding(text, engine=embedding_model)
-
-    resp_df_grouped["similarity"] = resp_df_grouped.filter(['embedding']).applymap(lambda x: cosine_similarity(x,test_embedding))
-
-    resp_df_grouped_result = resp_df_grouped.sort_values(by=['similarity'], ascending=False)
-
-    chapter = resp_df_grouped_result.iloc[0]["name"]
-    top_page = resp_df_grouped_result.iloc[0].Page
-    print(f"Found match in chapter {chapter} and page {top_page}")
-
-    content = ''
-    for i in range(-2,3):
-      try:
-        content += ' ' + resp_df_grouped_result.query("name == @chapter").query("Page == @top_page+@i").iloc[0].Text
-      except Exception:
-         pass
- 
     response_message = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature=temperature,
@@ -68,9 +86,16 @@ def get_response(text, temperature):
 def query():
     data = request.get_json()
     text = data['text']
+    full_content = 'Y' if data['full'] else 'N'
     temperature = float(data['temperature'])
     print(data)
-    response = get_response(text, temperature)
+    
+    try:
+        response = get_response(text, temperature, full_content)
+    except Exception as e:
+        print(traceback.format_exc() )
+        response = {'error': str(e)}
+    
     return jsonify({'response': response})
 
 if __name__ == '__main__':

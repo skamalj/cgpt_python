@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developing with OpenAI API</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+
+    <!-- BootstrapVue CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue.min.css">
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+
+    <!-- BootstrapVue Bundle -->
+    <script src="https://unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue.min.js"></script>
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <h3 class="mb-4">Developing with OpenAI API</h3>
+        <b-tabs pills>
+            <!-- Tab1 -->
+            <b-tab title="SQL">
+                <div id="query-component">
+                    <div class="form-group mt-2">
+                        <input id="nlp-query" type="text" class="form-control" v-model="nlpQuery"
+                            placeholder="Enter NLP Query" @keydown.enter="sendQuery">
+                    </div>
+
+                    <div class="form-group row mt-1">
+                        <label for="temperature" class="col-form-label col-md-2 mb-0"
+                            style="color: blue; font-family: Helvetica;">Set Temperature</label>
+                        <div class="col-md-3">
+                            <input id="temperature" type="number" class="form-control" v-model="temperature"
+                                placeholder="Enter Temperature" min="0" max="1" step="0.1">
+                        </div>
+                        <label for="model" class="col-form-label col-md-2 mb-0"
+                            style="color: blue; font-family: Helvetica;">Select Model</label>
+                        <div class="col-md-3">
+                            <label class="radio-inline">
+                                <input type="radio" v-model="selectedModel" value="text-davinci-003">text-davinci-003
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" v-model="selectedModel" value="gpt-3.5-turbo">gpt-3.5-turbo
+                            </label>
+                        </div>
+                    </div>
+
+                <div class="form-group row mt-1 mb-1">
+                    <label for="additional-info" class="col-form-label col-md-2 mb-0"
+                           style="color: blue; font-family: Helvetica;">Additional Info</label>
+                    <div class="col-md-3">
+                        <label class="radio-inline">
+                            <b-form-radio v-model="additionalInfo" value="none">None</b-form-radio>
+                        </label>
+                        <label class="radio-inline">
+                            <b-form-radio v-model="additionalInfo" value="prompt">Prompt</b-form-radio>
+                        </label>
+                        <label class="radio-inline">
+                            <b-form-radio v-model="additionalInfo" value="examples">Examples</b-form-radio>
+                        </label>
+                    </div>
+                    </div>
+
+                    <div v-if="sqlQuery" class="form-group">
+                        <h4>SQL Query:</h4>
+                        <p>{{ sqlQuery }}</p>
+                        <div class="form-group">
+                            <b-button @click="sendSQLQuery" variant="primary">Send Query</b-button>
+                        </div>
+                    </div>
+
+                    <div v-if="queryResult" class="form-group">
+                        <h4>Query Result:</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th v-for="(value, column) in queryResult[0]" :key="column">{{ column }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="record in queryResult" :key="record">
+                                    <td v-for="(value, column) in record" :key="column">{{ value }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </b-tab>
+
+            <!-- Tab2 -->
+            <b-tab title="QnA">
+                <div id="response-component">
+                    <div class="form-group m-2">
+                        <input id="query-text" type="text" class="form-control" v-model="queryText"
+                            placeholder="Enter Text">
+                    </div>
+
+                    <div class="form-group row mt-1">
+                        <label for="temperature" class="col-form-label col-md-2 mb-0"
+                            style="color: blue; font-family: Helvetica;">Set Temperature</label>
+                        <div class="col-md-3">
+                            <input id="temperature-qna" type="number" class="form-control" v-model="temperatureQnA"
+                                placeholder="Enter Temperature" min="0" max="2" step="0.2">
+                        </div>
+                        <div class="col-md-5 form-check">
+                          <input type="checkbox" class="form-check-input" v-model="full">
+                          <label class="form-check-label">Full</label>
+                      </div>
+                    </div>
+
+                    <div class="form-group m-2">
+                        <b-button @click="askQuery" variant="primary">Submit</b-button>
+                    </div>
+
+                    <div v-if="response" class="form-group">
+                        <h3>Response:</h3>
+                        <p>{{ response }}</p>
+                    </div>
+                </div>
+            </b-tab>
+        </b-tabs>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    nlpQuery: '',
+                    sqlQuery: '',
+                    queryResult: null,
+                    temperature: 0,
+                    temperatureQnA: 0.8,
+                    selectedModel: 'gpt-3.5-turbo',
+                    queryText: '',
+                    response: '',
+                    additionalInfo: 'prompt',
+                    full: false
+                };
+            },
+            methods: {
+                async askQuery() {
+                    try {
+                        const response = await fetch('http://localhost:5000/query', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ text: this.queryText, temperature: this.temperatureQnA, full: this.full })
+                        });
+
+                        const data = await response.json();
+                        this.response = data.response;
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                async sendQuery() {
+                    try {
+                        fetch('http://localhost:3000/generate-response', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ query: this.nlpQuery, temp: Number(this.temperature), 
+                                model: this.selectedModel, info: this.additionalInfo })
+                        })
+                            .then(response => response.json())
+                            .then(data => this.sqlQuery = data.sql);
+
+                    } catch (error) {
+                        this.sqlQuery = 'Error occurred while executing the query.' + JSON.stringify(error);
+                    }
+                },
+                async sendSQLQuery() {
+                    try {
+                        fetch('http://localhost:3000/bigquery-query', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ sql: this.sqlQuery })
+                        })
+                            .then(response => response.json())
+                            .then(data => this.queryResult = data.records);
+
+                    } catch (error) {
+                        this.queryResult = null;
+                        console.error(error);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
