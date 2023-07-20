@@ -7,6 +7,9 @@
 ```
 python create_embedding.py <filename.pdf>
 ```
+
+## Env
+Set OPENAI_API_KEY environment variable to your OPENAI Key
 ## Some questions
 * where did mrs dorling lived 
 * Why did the narrator of the story want to forget the address

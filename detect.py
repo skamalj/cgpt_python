@@ -62,7 +62,7 @@ def get_response(text, temperature, full='N'):
     
 
     # Read the OpenAI API key from the environment variable
-    openai_api_key = os.environ.get('OPENAPI_API_KEY')
+    openai_api_key = os.environ.get('OPENAI_API_KEY')
     # Set the OpenAI API key
     openai.api_key = openai_api_key
 
