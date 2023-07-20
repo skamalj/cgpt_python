@@ -44,6 +44,7 @@ def get_related_text_content(text):
     chapter = result_df.iloc[0]["name"]
     top_page = result_df.iloc[0]["Page"]
     print(f"Found match in chapter {chapter} and page {top_page}")
+    print(result_df.head(n=5))
 
     content = ''
     for i in range(-1,2):
