@@ -123,6 +123,45 @@
                     </div>
                 </div>
             </b-tab>
+
+            <!-- New Summary Tab -->
+            <b-tab title="Summary">
+                <div class="form-group mt-2">
+                    <label for="file-location">File Location</label>
+                    <input id="file-location" type="text" class="form-control" v-model="fileLocation" placeholder="Enter file location and name" @keydown.enter="summarizeText">
+                </div>
+
+                <div class="form-group row mt-1">
+                    <label for="temperature" class="col-form-label col-md-2 mb-0"
+                        style="color: blue; font-family: Helvetica;">Set Temperature</label>
+                    <div class="col-md-3">
+                        <input id="temperature" type="number" class="form-control" v-model="temperatureSummary"
+                            placeholder="Enter Temperature" min="0" max="1" step="0.1">
+                    </div>
+                    <label for="summary-type" class="col-form-label col-md-2 mb-0"
+                        style="color: blue; font-family: Helvetica;">Select Summary Type</label>
+                    <div class="col-md-3">
+                        <select id="summary-type" class="form-control" v-model="summaryType">
+                            <option value="concise">Concise</option>
+                            <option value="succinct">Succinct</option>
+                            <option value="comprehensive">Comprehensive</option>
+                            <option value="elaborate">Elaborate</option>
+                            <option value="detailed">Detailed</option>
+                            <option value="points">Bullet Points</option>
+                            <!-- Add other summary types as needed -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <b-button @click="summarizeText" variant="primary">Submit</b-button>
+                </div>
+
+                <div v-if="summaryResult" class="form-group">
+                    <h4>Summary:</h4>
+                    <p>{{ summaryResult }}</p>
+                </div>
+            </b-tab>
         </b-tabs>
     </div>
 
@@ -136,11 +175,15 @@
                     queryResult: null,
                     temperature: 0,
                     temperatureQnA: 0.8,
+                    temperatureSummary: 0.7,
                     selectedModel: 'gpt-3.5-turbo',
                     queryText: '',
                     response: '',
                     additionalInfo: 'prompt',
-                    full: false
+                    full: false,
+                    summaryType: 'concise',
+                    fileLocation: '',
+                    summaryResult: ''
                 };
             },
             methods: {
@@ -191,6 +234,27 @@
 
                     } catch (error) {
                         this.queryResult = null;
+                        console.error(error);
+                    }
+                },
+                // New method for Summary tab
+                async summarizeText() {
+                    try {
+                        const response = await fetch('http://localhost:5000/summarize', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                file_location: this.fileLocation,
+                                temperature: this.temperatureSummary,
+                                summary_type: this.summaryType
+                            })
+                        });
+
+                        const data = await response.json();
+                        this.summaryResult = data.summary;
+                    } catch (error) {
                         console.error(error);
                     }
                 }
