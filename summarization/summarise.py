@@ -33,7 +33,9 @@ def generate_summary(text_chunk):
             {"role": "system", "content": """
             You are an intelligent summarizer. Do not truncate input for any reason when creating summaries, use complete text input.
             Adhere to the context provided strictly.
-            Do not add anuy information in the summary which is not in the original text.
+            Do not add any information in the summary which is not in the original text.
+            Documents are being provided to you in parts, so it is ok to provide part siummary only. 
+            These will eventually be merged and put together to create one simgle summarty.
             """},
             {"role": "user", "content":user_prompt}
         ],
@@ -67,7 +69,7 @@ def generate_summaries(document):
 
         for i in range(num_chunks):
             # Move to the next chunk
-            start_idx = end_idx - 1000 if end_idx else 0
+            start_idx = end_idx  if end_idx else 0
 
             end_idx = min(end_idx + chars_per_chunk, len(document))
 

@@ -8,6 +8,14 @@
 python create_embedding.py <filename.pdf>
 ```
 
+## Runnning the demo
+* Execute the API backend
+```
+python detect.py
+```
+* Open frontend in browser i.e index.html (open directly, this is not served via backend)
+* Similarly for summarization, execute the corresponding summary.py (onle one of the two runs as they are on same port, change the port if you want to run them together)
+
 ## Env
 Set OPENAI_API_KEY environment variable to your OPENAI Key
 ## Some questions
