@@ -69,7 +69,13 @@ resp_df_grouped = resp_df.groupby('Page').agg(lambda x: ' '.join(x))
 
 resp_df_grouped["embedding"] = resp_df_grouped.filter(['Text']).applymap(lambda x: get_embedding(x, engine=embedding_model))
 
-output_filename = f'{input_filename[:-4]}_embedding.csv'
-resp_df_grouped.to_csv(output_filename)
+output_embedding_filename = f'{input_filename[:-4]}_embedding.csv'
+output_text_filename = f'{input_filename[:-4]}.txt'
+
+resp_df_grouped.to_csv(output_embedding_filename)
+
+file_text = pd.Series(resp_df_grouped['Text']).str.cat(sep=' ')
+pd.DataFrame([file_text]).to_csv(output_text_filename, header=False, index=False)
+
 print(resp_df_grouped)
 

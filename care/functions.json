@@ -1,0 +1,48 @@
+[
+    {
+        "name": "about_care_insurance",
+        "description": "Get details about care insurance, it's history and type of products it provides and also get list of products from this",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    },
+    {
+        "name": "product_qna",
+        "description": "This function will help to answer particular or specific details about any product at CARE. Do not use this for any open-ended question",
+        "parameters": {
+            "type": "object",
+            "required": ["product_name","specific_detail_asked","question"],
+            "properties": {
+                "product_name": {
+                    "type": "string",
+                    "description": "Product name for which specific details required",
+                    "enum": ["saksham","supreme","heart"]
+                },
+                "specific_detail_asked": {
+                    "type": "string",
+                    "description": "What specific detail about product user is interested in?"
+                },
+                "question": {
+                    "type": "string",
+                    "description": "Question asked by the user. This must be specified, if required you must rephraee it." 
+                }
+            }
+        }
+    },
+    {
+        "name": "get_product_summary",
+        "description": "Get general overview about insurance product available at CARE. Use this function for general open-ended questions only for everything else use product_qna",
+        "parameters": {
+            "type": "object",
+            "required": ["product_name"],
+            "properties": {
+                "product_name": {
+                    "type": "string",
+                    "description": "Product name for which overview or summary is required",
+                    "enum": ["saksham","supreme","heart"]
+                }
+            }
+        }
+    }
+]
