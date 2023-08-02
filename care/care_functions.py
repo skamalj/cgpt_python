@@ -39,11 +39,12 @@ def get_related_text_content(text, embedding_df,product,embedding_model="text-em
     
     embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
 
-    result_df = embedding_df.sort_values(by=['similarity'], ascending=False)
-    print(embedding_df)
+    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(5)
+    print(result_df)
     product_match = result_df.iloc[0]["name"]
     top_page = result_df.iloc[0]["Page"]
     print(f"Found match in product {product_match} and page {top_page}")
+
 
     content = ''
     for i in range(-1,2):
@@ -51,11 +52,15 @@ def get_related_text_content(text, embedding_df,product,embedding_model="text-em
         content += ' ' + result_df.query("Page == @top_page+@i").iloc[0].Text
       except Exception:
          pass
+    content = pd.Series(result_df['Text']).str.cat(sep=' ')
     return content
 
 def product_qna(args):
     product_name = args.get("product_name")
-    specific_detail_asked = args.get("specific_detail_asked")
+    specific_focus = args.get("specific_focus")
     question = args.get("question")
-    q = question if question.strip() != "" else f"describe {specific_detail_asked} for this {product_name}"
-    return get_related_text_content(q,embedding_df=embedding_dfs,product=product_name)
+    general_enquiry = args.get("general_enquiry")
+    if product_name is None:
+        return about_care_insurance()
+
+    return get_related_text_content(question,embedding_df=embedding_dfs,product=product_name)

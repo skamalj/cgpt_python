@@ -55,7 +55,7 @@ def call_openai_model(messages, temperature=0.7,functions=[]):
     return response["choices"][0]["message"]
 
 # Read the OpenAI API key from the environment variable
-openai.api_key = os.environ.get('OPENAPI_API_KEY')
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 temperature = 0.7
 # Function to generate a summary for a given text chunk
 functions = load_care_functions()
@@ -69,9 +69,10 @@ def healthbot():
         # Convert the conversationData to the messages format used in call_openai_model
         messages=[
             {"role": "system", "content": """
-            You work for care insurance organization and respond user questions strictly within the context provided. You always answer in brief and to the point.
+            You work for care insurance organization and respond user questions strictly within the context provided.
+            Keep you answers brief and concise, but make sure to leave good impression about Care Health.
             Do not make assumption, interview user for further information to get required parameters for functions, for example specifically ask for product name if user does not provide it. Under no circumstance should you assume it.
-            To get more details on the questions you can utilize the provided functions.
+            If you need more context to answer any question you can utilize provided functions. You do not always have to call functions for answering questions, do make a good judgement on this.
             """},
             #{"role": "user", "content": "What products do you have, list the names?"}
         ]
