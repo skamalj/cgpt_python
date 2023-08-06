@@ -1,27 +1,22 @@
 [
     {
         "name": "product_qna",
-        "description": "This function will helps to answer particular or specific details about any product at CARE or care itself",
+        "description": "The function aids in gathering relevant information or context required to generate a comprehensive and accurate answer to a user's query. By using this function, you can augment your knowledge and better tailor responses based on the specific needs or inquiries of the user.",
         "parameters": {
             "type": "object",
-            "required": ["general_inquiry","question"],
+            "required": ["product_name","user_input"],
             "properties": {
-                "product_name": {
+                "product_names": {
                     "type": "string",
-                    "description": "Product name for which specific details required",
-                    "enum": ["saksham","supreme","heart"]
+                    "description": "This parameter specifies the product name(s) for which the function should retrieve details, allowing you to respond effectively to the user. If multiple product names are required, they should be separated by commas. The parameter's value can be a combination of one or more of the following: 'none,' 'saksham,' 'supreme,' 'heart,' 'freedom,' or 'all.' Select 'all' if information from all products is needed to formulate the response, and choose 'none' if the question is not related to any specific product."
                 },
                 "specific_focus": {
                     "type": "string",
-                    "description": "What is the specific focus of the question?"
+                    "description": "What is the specific focus of user? If user has no specific focus then set this to 'summary'"
                 },
-                "question": {
+                "user_input": {
                     "type": "string",
-                    "description": "Question asked by the user. This must be specified, if required you must rephraee it as a proper question." 
-                },
-                "general_inquiry": {
-                    "type": "boolean",
-                    "description": "Is this a general inquiry about care or it's product?" 
+                    "description": "Please ensure that the user input is rephrased into a proper question, correcting any spelling mistakes. It is crucial not to skip or remove any part of the provided information. Also, make sure that the identified specific_focus is included as part of the question." 
                 }
             }
         }

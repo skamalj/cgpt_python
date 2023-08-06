@@ -69,3 +69,4 @@ First ask any question from below and check the `full` checkbox. This will submi
 * Similarly for summarization, execute the corresponding summary.py (only one of the two APIs  runs as they are on same port, change the port if you want to run them together)
 
 ## Health Bot
+Main code is in main.py and function definition is in functions.json

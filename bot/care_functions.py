@@ -32,35 +32,33 @@ def read_embeddings_files(directory_path):
 
 embedding_dfs = read_embeddings_files('./embeddings')
 
-def get_related_text_content(text, embedding_df,product,embedding_model="text-embedding-ada-002"):
+def get_related_text_content(text, embedding_df,product,head,embedding_model="text-embedding-ada-002"):
     text_embedding = get_embedding(text, engine=embedding_model)
     product_name = f"care-{product}"
-    embedding_df = embedding_df.query("name == @product_name")
+    if product != 'all':
+        embedding_df = embedding_df.query("name == @product_name")
     
     embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
 
-    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(5)
+    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(head)
     print(result_df)
-    product_match = result_df.iloc[0]["name"]
-    top_page = result_df.iloc[0]["Page"]
-    print(f"Found match in product {product_match} and page {top_page}")
-
-
-    content = ''
-    for i in range(-1,2):
-      try:
-        content += ' ' + result_df.query("Page == @top_page+@i").iloc[0].Text
-      except Exception:
-         pass
     content = pd.Series(result_df['Text']).str.cat(sep=' ')
     return content
 
 def product_qna(args):
-    product_name = args.get("product_name")
+    product_names = args.get("product_names")
     specific_focus = args.get("specific_focus")
-    question = args.get("question")
-    general_enquiry = args.get("general_enquiry")
-    if product_name is None:
+    user_input = args.get("user_input")
+
+    if product_names is None or (product_names == 'all' and specific_focus == 'summary') :
         return about_care_insurance()
 
-    return get_related_text_content(question,embedding_df=embedding_dfs,product=product_name)
+    product_list = product_names.split(',')
+
+    content =''
+    head = 4 if len(product_list) > 1 else 10
+    for p in product_list:
+        content += f'{p.strip()}\n'
+        content += f'{get_related_text_content(user_input,embedding_df=embedding_dfs,product=p.strip(),head=head)}\n\n'
+    
+    return content

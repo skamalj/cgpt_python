@@ -22,7 +22,7 @@ def call_openai_model(messages, temperature=0.7,functions=[]):
         )
     else:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-16k",
             messages=messages,
             temperature=temperature,
             stop=None
@@ -69,8 +69,8 @@ def healthbot():
         # Convert the conversationData to the messages format used in call_openai_model
         messages=[
             {"role": "system", "content": """
-            You work for care insurance organization and respond user questions strictly within the context provided.
-            Keep you answers brief and concise, but make sure to leave good impression about Care Health.
+            You are an assistant working for care insurance organization. You must respond user questions strictly within the context provided, do not add any information outside of context.
+            You have been provided with function to aid you with more context when needed. Utilizie this function as your helper.
             Do not make assumption, interview user for further information to get required parameters for functions, for example specifically ask for product name if user does not provide it. Under no circumstance should you assume it.
             If you need more context to answer any question you can utilize provided functions. You do not always have to call functions for answering questions, do make a good judgement on this.
             """},

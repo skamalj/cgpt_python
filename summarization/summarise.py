@@ -18,7 +18,7 @@ def generate_summary(text_chunk):
     # Define the possible summary types and their corresponding prompts
     summary_types = {
         "concise": f"Please provide a concise summary of the given text: {text_chunk}",
-        "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start wit sales pitch: {text_chunk}",
+        "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start with sales pitch: {text_chunk}",
         "comprehensive": f"I'd like a comprehensive and very descriptive summary of the given text: {text_chunk}",
         "elaborate": f"Can you provide an elaborate summary,broken into muultiple paragraphs, of this product. Exclude any legal or disclaimer content from this summary.: {text_chunk}",
         "detailed": f"Please share a detailed summary of the given text: {text_chunk}",
@@ -31,7 +31,7 @@ def generate_summary(text_chunk):
     }
     user_prompt = summary_types.get(summary_type, "Invalid summary type. Please choose from: concise, succinct, comprehensive, elaborate, or detailed.")
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-16k",
         messages=[
             {"role": "system", "content": """
             You are an intelligent summarizer. Do not truncate input for any reason when creating summaries, use complete text input.
@@ -53,11 +53,11 @@ def generate_summary(text_chunk):
 # Function to split the document into chunks and generate summary for each chunk
 async def generate_summaries(document):
     # Calculate the total number of tokens in the document
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo-16k")
     total_tokens = len(encoding.encode(document))
 
     # Check if the total tokens exceed the model's token limit (keeping some overhead margin)
-    model_token_limit = 2500  # Adjust this value based on the model's actual token limit
+    model_token_limit = 10000  # Adjust this value based on the model's actual token limit
     if total_tokens > model_token_limit:
 
         # Calculate the number of chunks based on the desired chunk size
