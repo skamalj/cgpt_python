@@ -32,24 +32,25 @@ def read_embeddings_files(directory_path):
 
 embedding_dfs = read_embeddings_files('./embeddings')
 
-def get_related_text_content(text, embedding_df,product,matches=3,embedding_model="text-embedding-ada-002"):
+def get_related_text_content(text, embedding_df,product,head,embedding_model="text-embedding-ada-002"):
     text_embedding = get_embedding(text, engine=embedding_model)
     product_name = f"care-{product}"
-    if product:
+    if product != 'all':
         embedding_df = embedding_df.query("name == @product_name")
     
     embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
 
-    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(matches)
+    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(head)
     print(result_df)
     content = pd.Series(result_df['Text']).str.cat(sep=' ')
     return content
 
 def product_qna(args):
     product_names = args.get("product_names")
-    question = args.get("question")
-    general_enquiry = args.get("general_enquiry")
-    if product_names is None:
+    specific_focus = args.get("specific_focus")
+    user_input = args.get("user_input")
+
+    if product_names is None or (product_names == 'all' and specific_focus == 'summary') :
         return about_care_insurance()
     prompt = ''
     if product_names == "all":
@@ -59,4 +60,4 @@ def product_qna(args):
         prompt += get_related_text_content(question,embedding_df=embedding_dfs,product=product_name.strip())
         prompt += "\n\n"
 
-    return prompt
+    return get_related_text_content(question,embedding_df=embedding_dfs,product=product_name)

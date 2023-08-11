@@ -22,7 +22,7 @@ def generate_summary(text_chunk):
     summary_types = {
         "entity_extraction": f"{entity_prompt}\n{text_chunk}",
         "concise": f"Please provide a concise summary of the given text: {text_chunk}",
-        "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start wit sales pitch: {text_chunk}",
+        "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start with sales pitch: {text_chunk}",
         "comprehensive": f"I'd like a comprehensive and very descriptive summary of the given text: {text_chunk}",
         "elaborate": f"Can you provide an elaborate summary,broken into muultiple paragraphs, of this product. Exclude any legal or disclaimer content from this summary.: {text_chunk}",
         "detailed": f"Please share a detailed summary of the given text: {text_chunk}",
@@ -61,7 +61,7 @@ async def generate_summaries(document):
     total_tokens = len(encoding.encode(document))
 
     # Check if the total tokens exceed the model's token limit (keeping some overhead margin)
-    model_token_limit = 6000  # Adjust this value based on the model's actual token limit
+    model_token_limit = 10000  # Adjust this value based on the model's actual token limit
     if total_tokens > model_token_limit:
 
         # Calculate the number of chunks based on the desired chunk size
