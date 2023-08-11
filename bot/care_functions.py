@@ -32,7 +32,7 @@ def read_embeddings_files(directory_path):
 
 embedding_dfs = read_embeddings_files('./embeddings')
 
-def get_related_text_content(text, embedding_df,product,head,embedding_model="text-embedding-ada-002"):
+def get_related_text_content(text, embedding_df,product,head=3,embedding_model="text-embedding-ada-002"):
     text_embedding = get_embedding(text, engine=embedding_model)
     product_name = f"care-{product}"
     if product != 'all':
@@ -57,7 +57,7 @@ def product_qna(args):
         product_names = "saksham,supreme,heart"
     for product_name in product_names.split(","):
         prompt += f"{product_name.strip()}\n"
-        prompt += get_related_text_content(question,embedding_df=embedding_dfs,product=product_name.strip())
+        prompt += get_related_text_content(user_input,embedding_df=embedding_dfs,product=product_name.strip())
         prompt += "\n\n"
 
-    return get_related_text_content(question,embedding_df=embedding_dfs,product=product_name)
+    return get_related_text_content(user_input,embedding_df=embedding_dfs,product=product_name)
