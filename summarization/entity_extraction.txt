@@ -1,0 +1,47 @@
+Please extract the following fields from the provided text. If a field can be inferred from the information then provide that value. Return extracted fields as json:
+
+Insurance company name
+Policyholder Name
+Policy Number
+Total Premium Paid[Total or Final Premium]
+Sum Assured
+Policy Start Date
+Policy End Date
+Date of Birth of Policyholder
+Gender
+Occupation
+Marital Status of policyholder
+PAN card number of policyholder
+Name of insurance product opted
+Name of insurance plan opted
+Policy Tenure
+Grace Period of the policy before it goes inactive
+UIN number of the plan opted
+Guaranteed Income Installment receivable
+Guaranteed Income on maturity
+Bonus available on maturity
+Top Up Sum Assured
+Premium Due Date
+Premium Paying Term or Tenure
+Mode of Payment
+Primary Address of policyholder for communication
+Pincode
+State
+City
+Mobile Number of policyholder
+Email ID of policyholder
+Nominee Name
+Relationship of nominee with Insured
+Nominee Age[Age of Nominee]
+Nominee Share percentage
+Appointee Name
+Relationship appointee with Nominee
+List of all Pre-existing Diseases policyholder have
+
+
+
+
+
+
+
+

@@ -12,11 +12,15 @@ import asyncio, time
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 temperature = 0.7
 summary_type = None
+with open(f'entity_extraction.txt', 'r') as file:
+    entity_prompt = file.read()
+
 # Function to generate a summary for a given text chunk
 def generate_summary(text_chunk):
     print(f"Starting generate summary at {time.strftime('%X')}")
     # Define the possible summary types and their corresponding prompts
     summary_types = {
+        "entity_extraction": f"{entity_prompt}\n{text_chunk}",
         "concise": f"Please provide a concise summary of the given text: {text_chunk}",
         "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start wit sales pitch: {text_chunk}",
         "comprehensive": f"I'd like a comprehensive and very descriptive summary of the given text: {text_chunk}",
@@ -29,15 +33,15 @@ def generate_summary(text_chunk):
         "overview": f"Provide 2 line overview Of this product: {text_chunk}",
         "in-depth": f"Could you provide an in-depth summary of the text: {text_chunk}? Please ensure to include all key points and supporting details."
     }
-    user_prompt = summary_types.get(summary_type, "Invalid summary type. Please choose from: concise, succinct, comprehensive, elaborate, or detailed.")
+    user_prompt = summary_types.get(summary_type, "Invalid summary type.")
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-16k",
         messages=[
             {"role": "system", "content": """
             You are an intelligent summarizer. Do not truncate input for any reason when creating summaries, use complete text input.
             Adhere to the context provided strictly.
             Do not add any information in the summary which is not in the original text.
-            Documents are being provided to you in parts, so it is ok to provide part siummary only. 
+            Documents are being provided to you in parts, so it is ok to provide part summary only. 
             These will eventually be merged and put together to create one simgle summarty.
             """},
             {"role": "user", "content":user_prompt}
@@ -53,11 +57,11 @@ def generate_summary(text_chunk):
 # Function to split the document into chunks and generate summary for each chunk
 async def generate_summaries(document):
     # Calculate the total number of tokens in the document
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo-16k")
     total_tokens = len(encoding.encode(document))
 
     # Check if the total tokens exceed the model's token limit (keeping some overhead margin)
-    model_token_limit = 2500  # Adjust this value based on the model's actual token limit
+    model_token_limit = 6000  # Adjust this value based on the model's actual token limit
     if total_tokens > model_token_limit:
 
         # Calculate the number of chunks based on the desired chunk size

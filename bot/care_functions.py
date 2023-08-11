@@ -32,35 +32,31 @@ def read_embeddings_files(directory_path):
 
 embedding_dfs = read_embeddings_files('./embeddings')
 
-def get_related_text_content(text, embedding_df,product,embedding_model="text-embedding-ada-002"):
+def get_related_text_content(text, embedding_df,product,matches=3,embedding_model="text-embedding-ada-002"):
     text_embedding = get_embedding(text, engine=embedding_model)
     product_name = f"care-{product}"
-    embedding_df = embedding_df.query("name == @product_name")
+    if product:
+        embedding_df = embedding_df.query("name == @product_name")
     
     embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
 
-    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(5)
+    result_df = embedding_df.sort_values(by=['similarity'], ascending=False).head(matches)
     print(result_df)
-    product_match = result_df.iloc[0]["name"]
-    top_page = result_df.iloc[0]["Page"]
-    print(f"Found match in product {product_match} and page {top_page}")
-
-
-    content = ''
-    for i in range(-1,2):
-      try:
-        content += ' ' + result_df.query("Page == @top_page+@i").iloc[0].Text
-      except Exception:
-         pass
     content = pd.Series(result_df['Text']).str.cat(sep=' ')
     return content
 
 def product_qna(args):
-    product_name = args.get("product_name")
-    specific_focus = args.get("specific_focus")
+    product_names = args.get("product_names")
     question = args.get("question")
     general_enquiry = args.get("general_enquiry")
-    if product_name is None:
+    if product_names is None:
         return about_care_insurance()
+    prompt = ''
+    if product_names == "all":
+        product_names = "saksham,supreme,heart"
+    for product_name in product_names.split(","):
+        prompt += f"{product_name.strip()}\n"
+        prompt += get_related_text_content(question,embedding_df=embedding_dfs,product=product_name.strip())
+        prompt += "\n\n"
 
-    return get_related_text_content(question,embedding_df=embedding_dfs,product=product_name)
+    return prompt
