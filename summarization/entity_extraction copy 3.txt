@@ -1,0 +1,18 @@
+Please extract the following fields from the provided text. Return extracted fields as json:
+
+Type of document
+Bill or recienpt details as key value 
+Array of itemized details, where each item is detailed as dictionary and each key in it is the identified detail lke name, price and other information.
+Bill summary details as key value
+
+
+
+
+
+
+
+
+
+
+
+

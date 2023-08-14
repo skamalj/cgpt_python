@@ -1,0 +1,9 @@
+State Income Tax
+Tax
+Employee Name
+Employer Name
+Employee Address
+SSA Number
+Social security wages
+Local Income Tax
+Reported Medicare Wages

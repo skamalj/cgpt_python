@@ -1,0 +1,23 @@
+Please extract the following fields from the provided text. If a field can be inferred from the information then provide that value. Return extracted fields as json:
+
+State Income Tax
+Tax
+Employee Name
+Employer Name
+Employee Address
+SSA Number
+Social security wages
+Local Income Tax
+Reported Medicare Wages
+
+
+
+
+
+
+
+
+
+
+
+
