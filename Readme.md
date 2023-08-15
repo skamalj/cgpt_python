@@ -1,4 +1,6 @@
 # QnA with OpenAI
+This is explained in this [blog](https://www.kamalsblog.com/2023/07/Leveraging-Text-Embeddings-for-QnA.html)
+
 Code for this is in `qna` folder.
 
 Implementation of the same is detailed in this [blog](https://www.kamalsblog.com/2023/07/Leveraging-Text-Embeddings-for-QnA.html)
@@ -67,6 +69,13 @@ First ask any question from below and check the `full` checkbox. This will submi
 
 ## Summarization
 * Similarly for summarization, execute the corresponding summary.py (only one of the two APIs  runs as they are on same port, change the port if you want to run them together)
+* For any given pdf, first step will be to extract the text out of it and then send to GPT. This is performed using AWS Textract, but you can use any other method. I have provided some sample txt files summarization/data folder, which you can use.
 
 ## Health Bot
+This is explained in this [blog](https://www.kamalsblog.com/2023/08/Intelligent-Bot-Harnessing-Function-Calling-Context-Completion-OpenAI-GPT.html)
+
 Main code is in main.py and function definition is in functions.json
+
+## NER - Named Entity Recognition
+This is based on summarization in a sense that we instruct GPT to identify named entities and respond with JSON structure of key value pairs for these.
+* Text data for recipts are in summarization/data folder i.e bestbuy, fiveguys and wage1. Corresponding pdfs are in pdf folder in root.
