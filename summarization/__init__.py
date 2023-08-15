@@ -1,0 +1,1 @@
+from .summarise import register_summary_routes

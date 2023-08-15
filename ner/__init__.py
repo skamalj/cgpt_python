@@ -1,0 +1,1 @@
+from .app import register_ner_routes

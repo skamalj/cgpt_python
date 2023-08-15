@@ -3,6 +3,7 @@ Tax
 Employee Name
 Employer Name
 Employee Address
+Employer Address
 SSA Number
 Social security wages
 Local Income Tax

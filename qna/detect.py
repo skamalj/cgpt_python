@@ -14,12 +14,12 @@ embedding_model = "text-embedding-ada-002"
 
 def load_embeddings():
     filenames = [
-        ('kesp101_embedding.csv', 'Horses'),
-        ('kesp102_embedding.csv', 'Address'),
-        ('kesp103_embedding.csv', 'Mother'),
-        ('kesp104_embedding.csv', 'Ghat'),
-        ('kesp105_embedding.csv', 'Birth'),
-        ('kesp106_embedding.csv', 'Melon')
+        ('./qna/embeddings/kesp101_embedding.csv', 'Horses'),
+        ('./qna/embeddings/kesp102_embedding.csv', 'Address'),
+        ('./qna/embeddings/kesp103_embedding.csv', 'Mother'),
+        ('./qna/embeddings/kesp104_embedding.csv', 'Ghat'),
+        ('./qna/embeddings/kesp105_embedding.csv', 'Birth'),
+        ('./qna/embeddings/kesp106_embedding.csv', 'Melon')
     ]
     
     dfs = []
@@ -82,22 +82,23 @@ def get_response(text, temperature, full='N'):
 
     return response_message["choices"][0]["message"]
 
-@app.route('/query', methods=['POST'])
-@cross_origin()
-def query():
-    data = request.get_json()
-    text = data['text']
-    full_content = 'Y' if data['full'] else 'N'
-    temperature = float(data['temperature'])
-    print(data)
-    
-    try:
-        response = get_response(text, temperature, full_content)
-    except Exception as e:
-        print(traceback.format_exc() )
-        response = {'error': str(e)}
-    
-    return jsonify({'response': response})
+def register_qna_routes(app):
+    @app.route('/query', methods=['POST'])
+    @cross_origin()
+    def query():
+        data = request.get_json()
+        text = data['text']
+        full_content = 'Y' if data['full'] else 'N'
+        temperature = float(data['temperature'])
+        print(data)
+
+        try:
+            response = get_response(text, temperature, full_content)
+        except Exception as e:
+            print(traceback.format_exc() )
+            response = {'error': str(e)}
+
+        return jsonify({'response': response})
 
 if __name__ == '__main__':
     # Run the server

@@ -1,4 +1,4 @@
-from data_utils import read_json_file, read_text_file
+from bot.data_utils import read_json_file, read_text_file
 from openai.embeddings_utils import get_embedding, cosine_similarity
 import os
 import glob
@@ -6,14 +6,14 @@ import pandas as pd
 import numpy as np
 
 def about_care_insurance():
-    return read_text_file('./data/about_care.txt')
+    return read_text_file('./bot/data/about_care.txt')
 
 def load_care_functions():
-    return read_json_file('functions.json')
+    return read_json_file('./bot/functions.json')
 
 def get_product_summary(args):
     product_name = args.get("product_name")
-    return read_text_file(f'./data/{product_name}.txt')
+    return read_text_file(f'./bot/data/{product_name}.txt')
 
 
 def read_embeddings_files(directory_path):
@@ -30,7 +30,7 @@ def read_embeddings_files(directory_path):
     
     return pd.concat(dfs)
 
-embedding_dfs = read_embeddings_files('./embeddings')
+embedding_dfs = read_embeddings_files('./bot/embeddings')
 
 def get_related_text_content(text, embedding_df,product,head=3,embedding_model="text-embedding-ada-002"):
     text_embedding = get_embedding(text, engine=embedding_model)

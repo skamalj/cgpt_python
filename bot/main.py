@@ -1,7 +1,7 @@
 import openai
 from flask import Flask, request, jsonify
 from flask_cors import CORS,cross_origin
-from care_functions import about_care_insurance, load_care_functions,get_product_summary,product_qna
+from bot.care_functions import about_care_insurance, load_care_functions,get_product_summary,product_qna
 import os
 from math import ceil
 import json
@@ -60,29 +60,29 @@ temperature = 0.7
 # Function to generate a summary for a given text chunk
 functions = load_care_functions()
 
+def register_bot_routes(app):
+    @app.route('/healthbot', methods=['POST'])
+    @cross_origin()
+    def healthbot():
+            data = request.json
 
-@app.route('/healthbot', methods=['POST'])
-@cross_origin()
-def healthbot():
-        data = request.json
+            # Convert the conversationData to the messages format used in call_openai_model
+            messages=[
+                {"role": "system", "content": """
+                You are an assistant working for care insurance organization. You must respond user questions strictly within the context provided, do not add any information outside of context.
+                You have been provided with function to aid you with more context when needed. Utilizie this function as your helper.
+                Do not make assumption, interview user for further information to get required parameters for functions, for example specifically ask for product name if user does not provide it. Under no circumstance should you assume it.
+                If you need more context to answer any question you can utilize provided functions. You do not always have to call functions for answering questions, do make a good judgement on this.
+                """},
+                #{"role": "user", "content": "What products do you have, list the names?"}
+            ]
+            for entry in data:
+                messages.append({"role": entry['role'], "content": entry['content']})
 
-        # Convert the conversationData to the messages format used in call_openai_model
-        messages=[
-            {"role": "system", "content": """
-            You are an assistant working for care insurance organization. You must respond user questions strictly within the context provided, do not add any information outside of context.
-            You have been provided with function to aid you with more context when needed. Utilizie this function as your helper.
-            Do not make assumption, interview user for further information to get required parameters for functions, for example specifically ask for product name if user does not provide it. Under no circumstance should you assume it.
-            If you need more context to answer any question you can utilize provided functions. You do not always have to call functions for answering questions, do make a good judgement on this.
-            """},
-            #{"role": "user", "content": "What products do you have, list the names?"}
-        ]
-        for entry in data:
-            messages.append({"role": entry['role'], "content": entry['content']})
+            # Call the OpenAI model
+            response = call_openai_model(messages,temperature,functions)
 
-        # Call the OpenAI model
-        response = call_openai_model(messages,temperature,functions)
-
-        return jsonify(response)
+            return jsonify(response)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -1,4 +1,6 @@
 *.pdf
+!pdfs/bestbuy.pdf
+!pdfs/fiveguys.pdf
 edel.txt
 hdfc.txt
 **/__pycache__/

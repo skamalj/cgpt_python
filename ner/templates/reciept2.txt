@@ -1,0 +1,6 @@
+Please extract the following fields from the provided text. Return extracted fields as json:
+
+Type of document
+Bill header, all bill level details as key value.
+ Array of itemized details, where each item is detailed as dictionary and each key in it is the identified detail for the item. Capture all item level details in here.
+

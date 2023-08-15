@@ -3,12 +3,17 @@
 Vue.component('template-management', {
     data() {
         return {
-            templateName: '',
-            templateDefinition: '',
             existingTemplates: {},
             isNewTemplate: false,
             newTemplateName: '',
+            templateName: '',
+            templateDefinition:''
         };
+    },
+    watch: {
+        templateDefinition(newTemplateDefinition) {
+            this.$emit('template-definition-changed', newTemplateDefinition);
+        },
     },
     methods: {
         async fetchTemplates() {

@@ -12,15 +12,13 @@ import asyncio, time
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 temperature = 0.7
 summary_type = None
-with open(f'entity_extraction.txt', 'r') as file:
-    entity_prompt = file.read()
+entity_prompt = None
 
 # Function to generate a summary for a given text chunk
 def generate_summary(text_chunk):
     print(f"Starting generate summary at {time.strftime('%X')}")
     # Define the possible summary types and their corresponding prompts
     summary_types = {
-        "entity_extraction": f"{entity_prompt}\n{text_chunk}",
         "concise": f"Please provide a concise summary of the given text: {text_chunk}",
         "succinct": f"Could you give me a succinct summary of the provided text. Clearly highlight which policy is this and what is the cord product. Provide the summary as if you are going to start with sales pitch: {text_chunk}",
         "comprehensive": f"I'd like a comprehensive and very descriptive summary of the given text: {text_chunk}",
@@ -33,7 +31,10 @@ def generate_summary(text_chunk):
         "overview": f"Provide 2 line overview Of this product: {text_chunk}",
         "in-depth": f"Could you provide an in-depth summary of the text: {text_chunk}? Please ensure to include all key points and supporting details."
     }
-    user_prompt = summary_types.get(summary_type, "Invalid summary type.")
+    if summary_type == "entity_extraction":
+        user_prompt = f"{entity_prompt}\n{text_chunk}"
+    else:
+        user_prompt = summary_types.get(summary_type, "Invalid summary type.")
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
         messages=[
@@ -95,25 +96,30 @@ async def generate_summaries(document):
 # Create a Flask app
 app = flask.Flask(__name__)
 
+def register_summary_routes(app):
 # Define the API endpoint to accept file location, progressive_percentage, and desired_tokens, and return the summary
-@app.route('/summarize', methods=['POST'])
-@cross_origin()
-def summarize_file():
-    global temperature
-    global summary_type
-    # Get the file location, progressive_percentage, and desired_tokens from the request
-    file_location = request.json.get('file_location')
-    summary_type = request.json.get('summary_type')
-    temperature = float(request.json.get('temperature'))
-    
-    # Read the content of the file
-    with open(file_location, 'r') as file:
-        document = file.read()
-    document = re.sub('\s+',' ',document).strip()
-    # Generate the summary using the document content, progressive_percentage, and desired_tokens
-    final_summary = asyncio.run(generate_summaries(document))
+    @app.route('/summarize', methods=['POST'])
+    @cross_origin()
+    def summarize_file():
+        global temperature
+        global summary_type
+        global entity_prompt
+        # Get the file location, progressive_percentage, and desired_tokens from the request
+        print(request.get_json())
+        file_location = request.json.get('file_location')
+        summary_type = request.json.get('summary_type')
+        temperature = float(request.json.get('temperature'))
+        if summary_type == 'entity_extraction':
+            entity_prompt = request.json.get('entity_prompt')
 
-    return jsonify({'summary': final_summary})
+        # Read the content of the file
+        with open(file_location, 'r') as file:
+            document = file.read()
+        document = re.sub('\s+',' ',document).strip()
+        # Generate the summary using the document content, progressive_percentage, and desired_tokens
+        final_summary = asyncio.run(generate_summaries(document))
+
+        return jsonify({'summary': final_summary})
 
 if __name__ == '__main__':
     # Run the Flask app on port 5000 (you can change the port if needed)
