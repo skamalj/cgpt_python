@@ -1,0 +1,23 @@
+The following data has 30 columns, all separated by comma. 
+Columns one is Serial Number and is greater than 0 when column 2 represents Insurer name else column one is "NA" and column 2 represnts sub category for insurer.
+Rest of the 28 colums are  gouped into 4 groups, called metrics,  with 7 columns each, which are:-
+"For july 2022"  "For july 2023" "Growth in %"  "Up to July 2022"  "Up to July 2023" "Growth in %" "Market Share"
+
+Four Metrics are mapped to columns as following:-:
+Col number 3-9  is premium metric. 
+Col nunber 10-16 is policy metric. 
+Col number 17-23 is life metric. 
+Col number 24-30 is others metric.
+
+
+All questions which are asked are just plain lookup and no calculations are required. Ex. "tell me market sure for xxx insurer for category yyy"
+
+SNo,Insurer,"For july 2022","For july 2023",Growth in %,"Up to July 2022","Up to July 2023",Growth in %,Market Share,"Up to July 2022","Up to  July 2023",Growth in %,"Up to  July 2022","Up to  July 2023",Growth in %,Market Share,"For  July 2022","For  July2023",Growth in %,"Up to  July 2022","Up to  July 2023",Growth in %,Market Share,"For  July 2022","For  July2023",Growth in %,"Up to  July 2022","Up to  July 2023",Growth in %,Market Share
+1,Aditya Birla Sun Life,469.52,465.93,-0.76,1803.45,2127.38,17.96,2.11,17030,19714,15.76,60721,75013.00,23.54,1.05,351112,339319,-3.36,1299887,1564174,20.33,1.56,18498.00,23858.88,28.98,80552.23,102382.48,27.10,3.40
+NA,Individual Single Premium,40.30,41.72,3.53,85.33,108.07,26.65,0.89,678,505,-25.52,1296,1960,51.23,0.60,0,NA,NA,0,NA,NA,NA,59.35,58.15,-2.03,115.47,183.28,58.72,2.08
+NA,Individual Non-Single Premium,172.30,187.50,8.82,576.66,720.99,25.03,2.91,16323,19178,17.49,59308,72929,22.97,1.07,0,NA,NA,0,NA,NA,NA,2781.43,3138.80,12.85,9555.51,12100.33,26.63,1.83
+NA,Group Single Premium,240.98,221.29,-8.17,1075.30,1210.02,12.53,2.04,9,5,-44.44,32,21,-34.38,3.95,311408,298335,-4.20,1087381,1321866,21.56,2.23,3847.05,3605.04,-6.29,13225.74,14791.95,11.84,2.17
+NA,Group Non-Single Premium,0.67,0.27,-60.42,1.74,1.65,-5.20,0.15,0,0,NA,1,0,-100.00,0.00,0,0,NA,20,0,-100.00,0.00,0.00,0.00,NA,0.00,0.00,NA,0.00
+NA,Group Yearly Renewable Premium,15.26,15.15,-0.73,64.42,86.65,34.51,2.40,20,26,30.00,84,103,22.62,0.98,39704,40984,3.22,212486,242308,14.03,0.62,11810.16,17056.89,44.43,57655.51,75306.93,30.62,4.65
+
+what is the market share for Individual Single Premium for others?
