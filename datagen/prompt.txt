@@ -1,50 +1,54 @@
-There is an aqpplication which is used ot create random data.  To create this data it needs to be supplied with record configuration in YAML format. This configuration must adhere to openapi schema definition given below:
-{
-    "id": "/RefRecord",
-    "type": "object",
-    "additionalProperties": false,
-    "patternProperties": {
-        "^[a-zA-Z]*$": {
-            "type": "object",
-            "required": ["schema"],
-            "additionalProperties": false,
-            "properties": {
-                "count": { "type": "integer" },
-                "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "required": ["name", "namespace", "function"],
-                        "additionalProperties": false,
-                        "properties": {
-                            "name": { "type": "string" },
-                            "namespace": { "type": "string" },
-                            "function": { "type": "string" },
-                            "unique": { "type": "boolean" },
-                            "args": {
-                                "type": "array",
-                                "items": { 
-                                    "type": "object",
-                                    "additionalProperties": true
-                                }
-                            },
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+There is an aqpplication which is used to create random fake API data, strictly based on the functions defined below.  
+Below is the list of functions to use. 
+Each funcation name is prefixed by namespace. 
+You must use  namespace and function from this list and this list only.
 
-In above definition, below is the meaning of fields:
+Function list
+
+helpers.arrayElement(array) # Returns one random element from the given list of items.
+helpers.arrayElements(array, count) # Returns a random array of elements from the given array, with the specified count.
+helpers.arrayValues(array) # Returns an array of the values of all the elements in the given array.
+helpers.ipv4() # Returns a random IPv4 address.
+helpers.ipv6() # Returns a random IPv6 address.
+helpers.lorem(count) # Returns a random string of lorem ipsum text, with the specified word count.
+number.int(min, max) # Returns a random integer, between the specified minimum and maximum values.
+number.float(min, max) # Returns a random floating-point number, between the specified minimum and maximum values.
+string.alpha(length) # Returns a random string of alphabetic characters, with the specified length.
+string.numeric(length) # Returns a random string of numeric characters, with the specified length.
+string.alphanumeric(length) # Returns a random string of alphanumeric characters, with the specified length.
+string.hexadecimal(length) # Returns a random string of hexadecimal characters, with the specified length.
+string.uuid() # Returns a random UUID.
+date.past({{years: num_of_years_in_past, ref_date: referecne date for generating the data}}) # Returns a random past date, accepts dictionary object where years indicate the range of years date maybe in past and ref_date is the reference date.
+date.future(object) # Returns a random future date, accepts object where years indicate the range of years date maybe in future.
+date.recent() # Returns a random recent date.
+date.between(object) # Returns a random date between the specified from and to dates in the passed object.
+date.month() # Returns a random month.
+date.weekday() # Returns a random weekday.
+person.firstName() # Returns a random first name.
+person.lastName() # Returns a random last name.
+person.gender()
+person.jobType()
+person.jobTitle()
+phone.number() # Returns a random phone number.
+location.city() # Returns a random city.
+location.state() # Returns a random state.
+location.country() # Returns a random country.
+location.latitude() # Returns a random latitude.
+location.longitude() # Returns a random longitude.
+location.coordinates() # Returns a random pair of latitude and longitude coordinates.
+internet.email() # Returns a random email address.
+
+
+Configuration for the application is defined using following fields:
+
 count: Number of records to generate, this is optional and can be left blank in which case this record is generated on-demand or dynamically
 name: filed name within the record
 function: function from fakerjs library which can be used to create this field
 namespace: namespace to which the function belongs. Ex. for city this will be location
 unique: If this property is set for a column, valid only when count is specified, all values for the column within the collection will be unique 
-args: Arguments required by function.
+args: list of arguments required by function 
 
-Based on above schema, below is valid configuration for customer, which has these fields - customer_id, name, phone, email, and city. Since count is not specified data is generated dynamically one at a time when requested
+Based on above definition of fields, below is valid configuration for customer, which has these fields - customer_id, customer_type is one of A B C, name, email, and city. Since count is not specified data is generated dynamically one at a time when requested
 customer:
   schema:
     - name: customer_id
@@ -53,19 +57,21 @@ customer:
       unique: true
       args:
         - min: 1
-        - max: 100
+          max: 100
+    - name: customer_type
+      namespace: helpers
+      function: arrayElement
+      args:
+        - ["A", "B", "C"]
     - name: name
-      namespace: faker
-      function: name
-    - name: phone
-      namespace: phone
-      function: phoneNumber
+      namespace: person
+      function: firstName
     - name: email
       namespace: internet
       function: email
     - name: city
-      namespace: address
+      namespace: location
       function: city
 
-Now based on the above information create configuration for apache log
-Now based on above information create configuration for iot_sensors - device_id, factory_id - which ranges from 1 to 10, section which has value one of [A B C D], sensor_type which is one of [ temperature humidiuty proximity smoke level ]. Application should create records dynamically and city should be unique.
+Now based on above information answer following:-
+

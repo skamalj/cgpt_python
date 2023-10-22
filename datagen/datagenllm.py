@@ -1,22 +1,22 @@
+from langchain.llms import GooglePalm
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import SystemMessage
-from langchain.agents import OpenAIFunctionsAgent
-from langchain.agents import AgentExecutor
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
-from main import get_insurers, get_data
+#llm = GooglePalm(modelName="models/text-bison-001")
 llm = ChatOpenAI(temperature=0)
-tools = [get_data, get_insurers]
+system_prompt = ""
+with open("prompt.txt", 'r') as prompt_fh:
+    system_prompt = prompt_fh.read()
 
-system_message = SystemMessage(content="""
-You are very powerful assistant, who can easily lookup data using tools provided.
-Insurer name must be from the list provided by get_insurer tool. Call that first to identify correct insurer name.
-Do not assume any value or input. If a value for tool or function cannot be inferred from input then respond with followup question to get details
+print(system_prompt + "\n{question}")
+prompt_template = PromptTemplate(
+    input_variables=["question"],
+    template= system_prompt + "\n{question}",
+)
+chain = LLMChain(llm=llm, prompt=prompt_template)
 
-""")
-prompt = OpenAIFunctionsAgent.create_prompt(system_message=system_message)
+question = "create configuration for iot_sensors - device_id is integer between 100 and 999, device_name is a string of 10 characters, factory_id - which ranges from 1 to 10, section which has value randomly selected from  [A B C D], sensor_type which is one of [ temperature humidiuty proximity smoke level ], date_commisioned is past date upto 5 years old with reference date of 01-01-2018. Application should create records dynamically."
 
-agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
-
-
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-agent_executor.run("compare market share of individual premium for reliance and aditya birla?")
+resp = chain.run(question=question)
+print(resp)

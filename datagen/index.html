@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AWS Cognito Authentication with GitHub</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Log in with GitHub</h1>
+        <div>
+            <label for="github-username">GitHub Username:</label>
+            <input type="text" id="github-username" v-model="githubUsername">
+        </div>
+        <div>
+            <label for="github-token">GitHub Personal Access Token:</label>
+            <input type="password" id="github-token" v-model="githubToken">
+        </div>
+        <button @click="authenticateWithGitHub">Log in with GitHub</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.1106.0/aws-sdk.min.js"></script>
+    <script>
+        AWS.config.region = 'YOUR_AWS_REGION'; // Replace with your AWS region
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: 'YOUR_IDENTITY_POOL_ID', // Replace with your Identity Pool ID
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                githubUsername: '',
+                githubToken: '',
+            },
+            methods: {
+                authenticateWithGitHub() {
+                    // Get the GitHub username and personal access token
+                    const username = this.githubUsername;
+                    const token = this.githubToken;
+
+                    // Initialize the GitHub authentication provider
+                    AWS.config.credentials.params.Logins = {
+                        'github.com': token, // GitHub token
+                    };
+
+                    // Trigger a refresh of AWS credentials, which will authenticate with AWS Cognito
+                    AWS.config.credentials.refresh(error => {
+                        if (error) {
+                            console.error('Error refreshing AWS credentials:', error);
+                        } else {
+                            // Successfully authenticated with AWS Cognito
+                            const idToken = AWS.config.credentials.params.Logins['cognito-idp.YOUR_AWS_REGION.amazonaws.com/YOUR_USER_POOL_ID'];
+                            console.log('ID Token:', idToken);
+
+                            // Send the Cognito ID token to your backend for further verification
+                            fetch('http://localhost:3000/verify', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${idToken}`,
+                                },
+                                body: JSON.stringify({
+                                    githubUsername: username,
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
