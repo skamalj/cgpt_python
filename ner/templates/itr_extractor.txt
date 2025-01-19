@@ -1,0 +1,5 @@
+Extract following entities from given test:
+Total Income
+Name
+address
+pan

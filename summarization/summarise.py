@@ -1,4 +1,5 @@
-import openai
+from openai import OpenAI
+
 import flask
 from flask import request, jsonify
 from flask_cors import CORS,cross_origin
@@ -9,7 +10,6 @@ import re
 import asyncio, time
 
 # Read the OpenAI API key from the environment variable
-openai.api_key = os.environ.get('OPENAI_API_KEY')
 temperature = 0.7
 summary_type = None
 entity_prompt = None
@@ -35,22 +35,23 @@ def generate_summary(text_chunk):
         user_prompt = f"{entity_prompt}\n{text_chunk}"
     else:
         user_prompt = summary_types.get(summary_type, "Invalid summary type.")
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
-        messages=[
-            {"role": "system", "content": """
-            You are an intelligent summarizer. Do not truncate input for any reason when creating summaries, use complete text input.
-            Adhere to the context provided strictly.
-            Do not add any information in the summary which is not in the original text.
-            Documents are being provided to you in parts, so it is ok to provide part summary only. 
-            These will eventually be merged and put together to create one simgle summarty.
-            """},
-            {"role": "user", "content":user_prompt}
-        ],
-        temperature=temperature,
-        stop=None
+
+    client = OpenAI()   
+    response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": """
+        You are an intelligent summarizer. Do not truncate input for any reason when creating summaries, use complete text input.
+        Adhere to the context provided strictly.
+        Do not add any information in the summary which is not in the original text.
+        Documents are being provided to you in parts, so it is ok to provide part summary only. 
+        These will eventually be merged and put together to create one simgle summarty.
+        """},
+        {"role": "user", "content":user_prompt}
+    ],
+    temperature=temperature
     )
-    summary = response["choices"][0]["message"]["content"]
+    summary = response.choices[0].message.content.strip()
     print(f"finished generate summary at {time.strftime('%X')}")
     #summary = re.sub('\s+',' ',summary).strip()
     return summary

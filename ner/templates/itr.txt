@@ -1,0 +1,3 @@
+Please extract following fields:
+Total Income
+Name

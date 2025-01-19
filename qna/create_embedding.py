@@ -2,7 +2,6 @@ import boto3
 import json
 import time
 import openai
-from openai.embeddings_utils import get_embedding
 import pandas as pd
 import os
 import sys
@@ -41,21 +40,22 @@ def wait_for_job_completion(job_id, textract_client):
 
         print('Job status:', job_status)
         time.sleep(5)  # Wait for 5 seconds before checking again
-        complete_response = get_complete_response(job_id, textract_client)
+
+    complete_response = get_complete_response(job_id, textract_client)
 
     return complete_response
 
-# send bytes to textract
+# Send bytes to Textract
 textract = boto3.client('textract')
 response = textract.start_document_text_detection(
     DocumentLocation={
         'S3Object': {
-            'Bucket': 'cgpt-skamalj',
+            'Bucket': 'cgpt-skamalj-sso',
             'Name': f'input/{input_filename}',
         }
     },
     OutputConfig={
-        'S3Bucket': 'cgpt-skamalj',
+        'S3Bucket': 'cgpt-skamalj-sso',
         'S3Prefix': f'output/{input_filename[:-4]}'
     }
 )
@@ -63,19 +63,32 @@ print(json.dumps(response, indent=4))
 
 response = wait_for_job_completion(response["JobId"], textract)
 
+# Extract text and page numbers
 resp_df = pd.DataFrame(response['Blocks']).query('BlockType == "WORD"').filter(['Text', 'Page'])
 
+# Group words by page
 resp_df_grouped = resp_df.groupby('Page').agg(lambda x: ' '.join(x))
 
-#resp_df_grouped["embedding"] = resp_df_grouped.filter(['Text']).applymap(lambda x: get_embedding(x, engine=embedding_model))
+# Embed the grouped text using the new OpenAI SDK
+def get_embedding(text):
+    response = openai.Embedding.create(
+        input=text,
+        model=embedding_model
+    )
+    return response['data'][0]['embedding']
 
+# Apply embedding to the grouped text
+#resp_df_grouped["embedding"] = resp_df_grouped["Text"].apply(get_embedding)
+
+# Save the embedding and text to output files
 output_embedding_filename = f'{input_filename[:-4]}_embedding.csv'
 output_text_filename = f'{input_filename[:-4]}.txt'
 
-#resp_df_grouped.to_csv(output_embedding_filename)
+# Save the embeddings to a CSV file
+#resp_df_grouped['embedding'].to_csv(output_embedding_filename, header=False, index=False)
 
+# Save the plain text to a .txt file
 file_text = pd.Series(resp_df_grouped['Text']).str.cat(sep=' ')
 pd.DataFrame([file_text]).to_csv(output_text_filename, header=False, index=False)
 
 print(resp_df_grouped)
-

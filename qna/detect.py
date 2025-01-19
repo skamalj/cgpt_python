@@ -1,10 +1,9 @@
 import openai
-from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 import numpy as np
 from flask import Flask, request, jsonify
 import os
-from flask_cors import CORS,cross_origin
+from flask_cors import CORS, cross_origin
 import traceback
 import tiktoken
 
@@ -34,42 +33,57 @@ def load_embeddings():
 # Load embeddings
 embedding_df = load_embeddings()
 
+# Define cosine similarity
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# Fetch related text content
 def get_related_text_content(text):
-    text_embedding = get_embedding(text, engine=embedding_model)
+    # Generate embedding using the new OpenAI SDK
+    response = openai.Embedding.create(
+        input=text,
+        model=embedding_model
+    )
+    text_embedding = np.array(response['data'][0]['embedding'])
 
-    embedding_df["similarity"] = embedding_df.filter(['embedding']).applymap(lambda x: cosine_similarity(x,text_embedding))
+    # Calculate cosine similarity
+    embedding_df["similarity"] = embedding_df['embedding'].apply(lambda x: cosine_similarity(x, text_embedding))
 
+    # Sort results by similarity
     result_df = embedding_df.sort_values(by=['similarity'], ascending=False)
 
+    # Extract top match information
     chapter = result_df.iloc[0]["name"]
     top_page = result_df.iloc[0]["Page"]
     print(f"Found match in chapter {chapter} and page {top_page}")
     print(result_df.head(n=5))
 
+    # Gather surrounding text content
     content = ''
-    for i in range(-1,2):
-      try:
-        content += ' ' + result_df.query("name == @chapter").query("Page == @top_page+@i").iloc[0].Text
-      except Exception:
-         pass
+    for i in range(-1, 2):
+        try:
+            content += ' ' + result_df.query("name == @chapter").query("Page == @top_page+@i").iloc[0].Text
+        except Exception:
+            pass
     return content
 
+# Count tokens
 def count_tokens(text):
     encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
     num_tokens = len(encoding.encode(text))
     return num_tokens
 
+# Generate chat response
 def get_response(text, temperature, full='N'):
-    
-
-    # Read the OpenAI API key from the environment variable
+    # Fetch OpenAI API key
     openai_api_key = os.environ.get('OPENAI_API_KEY')
-    # Set the OpenAI API key
     openai.api_key = openai_api_key
 
-    content =  get_related_text_content(text) if full == 'N' else ' '.join(embedding_df['Text'])
+    # Determine content for response
+    content = get_related_text_content(text) if full == 'N' else ' '.join(embedding_df['Text'])
     print(f'Request has {count_tokens(content + text)} tokens')
 
+    # Create chat completion
     response_message = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature=temperature,
@@ -82,6 +96,7 @@ def get_response(text, temperature, full='N'):
 
     return response_message["choices"][0]["message"]
 
+# Register routes
 def register_qna_routes(app):
     @app.route('/query', methods=['POST'])
     @cross_origin()
@@ -95,7 +110,7 @@ def register_qna_routes(app):
         try:
             response = get_response(text, temperature, full_content)
         except Exception as e:
-            print(traceback.format_exc() )
+            print(traceback.format_exc())
             response = {'error': str(e)}
 
         return jsonify({'response': response})
